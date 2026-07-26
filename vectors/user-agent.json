@@ -1,0 +1,48 @@
+{
+  "rule": "isConformantUserAgent",
+  "section": "SPEC.md §4.1",
+  "description": "An operator seeing unexplained traffic must be able to identify it and reach the methodology in one step.",
+  "cases": [
+    {
+      "id": "cli-user-agent",
+      "given": { "userAgent": "BNA CLI/0.1.0 (+https://bna.dev/trust-methodology)" },
+      "expect": true
+    },
+    {
+      "id": "hosted-prober-user-agent",
+      "given": { "userAgent": "BNA Prober/2.3.1 (+https://bna.dev/trust-methodology)" },
+      "expect": true
+    },
+    {
+      "id": "missing-methodology-link",
+      "given": { "userAgent": "BNA CLI/0.1.0" },
+      "expect": false
+    },
+    {
+      "id": "wrong-link",
+      "given": { "userAgent": "BNA CLI/0.1.0 (+https://example.invalid/about)" },
+      "expect": false
+    },
+    {
+      "id": "does-not-name-bna",
+      "given": { "userAgent": "curl/8.4.0" },
+      "expect": false
+    },
+    {
+      "id": "anonymous-browser-impersonation",
+      "description": "A probe must never disguise itself as a browser.",
+      "given": { "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)" },
+      "expect": false
+    },
+    {
+      "id": "insecure-link-rejected",
+      "given": { "userAgent": "BNA CLI/0.1.0 (+http://bna.dev/trust-methodology)" },
+      "expect": false
+    },
+    {
+      "id": "empty",
+      "given": { "userAgent": "" },
+      "expect": false
+    }
+  ]
+}

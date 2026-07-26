@@ -1,0 +1,71 @@
+{
+  "rule": "classifyOutcome",
+  "section": "SPEC.md §2.2",
+  "description": "Assign exactly one outcome to one observation. First matching row of the §2.2 table wins.",
+  "cases": [
+    {
+      "id": "success-200",
+      "given": { "status": 200 },
+      "expect": { "outcome": "success" }
+    },
+    {
+      "id": "success-204",
+      "given": { "status": 204 },
+      "expect": { "outcome": "success" }
+    },
+    {
+      "id": "success-301-redirect-is-a-response",
+      "description": "3xx is a successful observation of the endpoint, not an error.",
+      "given": { "status": 301 },
+      "expect": { "outcome": "success" }
+    },
+    {
+      "id": "failure-404",
+      "given": { "status": 404 },
+      "expect": { "outcome": "failure", "reason": "http_404" }
+    },
+    {
+      "id": "failure-500",
+      "given": { "status": 500 },
+      "expect": { "outcome": "failure", "reason": "http_500" }
+    },
+    {
+      "id": "rate-limited-429-is-not-a-failure",
+      "description": "The rule this whole specification exists to pin down. TRUST-METHODOLOGY.md §3.4.",
+      "given": { "status": 429 },
+      "expect": { "outcome": "not_attempted", "reason": "rate_limited" }
+    },
+    {
+      "id": "rate-limited-with-retry-after-still-not-a-failure",
+      "given": { "status": 429, "transportError": false },
+      "expect": { "outcome": "not_attempted", "reason": "rate_limited" }
+    },
+    {
+      "id": "network-error-no-status",
+      "given": { "status": null, "transportError": true },
+      "expect": { "outcome": "failure", "reason": "network_error" }
+    },
+    {
+      "id": "deadline-beats-status",
+      "description": "Row 3 precedes row 4: a deadline reached mid-flight is our limit, not the target's fault.",
+      "given": { "status": 429, "deadlineReached": true },
+      "expect": { "outcome": "not_attempted", "reason": "deadline_exceeded" }
+    },
+    {
+      "id": "interrupt-beats-deadline",
+      "given": { "interrupted": true, "deadlineReached": true, "status": 500 },
+      "expect": { "outcome": "not_attempted", "reason": "interrupted" }
+    },
+    {
+      "id": "exclusion-beats-everything",
+      "description": "An honoured exclusion is decided before any request is issued.",
+      "given": { "excluded": true, "interrupted": true, "status": 200 },
+      "expect": { "outcome": "not_attempted", "reason": "excluded" }
+    },
+    {
+      "id": "interrupt-does-not-manufacture-a-failure",
+      "given": { "interrupted": true, "status": null, "transportError": true },
+      "expect": { "outcome": "not_attempted", "reason": "interrupted" }
+    }
+  ]
+}

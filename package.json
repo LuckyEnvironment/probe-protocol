@@ -1,0 +1,48 @@
+{
+  "name": "@bna/probe-protocol",
+  "version": "0.1.0",
+  "description": "Specification, schema, reference vectors and conformance suite for the BNA probe protocol",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./schema": "./schemas/probe-summary-1.0.0.schema.json",
+    "./vectors/*": "./vectors/*"
+  },
+  "bin": {
+    "probe-conformance": "bin/probe-conformance.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "schemas/",
+    "vectors/",
+    "SPEC.md",
+    "LICENSE",
+    "LICENSE-docs",
+    "NOTICE",
+    "README.md",
+    "SECURITY.md",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "test:coverage": "node --experimental-test-coverage --test --test-coverage-lines=85",
+    "lint": "eslint .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "conformance": "node bin/probe-conformance.js",
+    "check": "npm run lint && npm run typecheck && npm run test"
+  },
+  "keywords": ["bna", "trust", "probe", "conformance", "a2a"],
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "eslint": "^9.39.1",
+    "prettier": "^3.8.2",
+    "typescript": "^5.9.3"
+  }
+}

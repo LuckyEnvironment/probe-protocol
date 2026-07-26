@@ -1,0 +1,30 @@
+{
+  "rule": "assertAllowedMethod",
+  "section": "SPEC.md §3.1",
+  "description": "The read-only allowlist. A disallowed method must be refused, not silently substituted — substitution would make the promise unfalsifiable.",
+  "cases": [
+    { "id": "get-allowed", "given": { "method": "GET" }, "expect": { "allowed": true, "method": "GET" } },
+    { "id": "head-allowed", "given": { "method": "HEAD" }, "expect": { "allowed": true, "method": "HEAD" } },
+    {
+      "id": "lowercase-is-normalised",
+      "given": { "method": "get" },
+      "expect": { "allowed": true, "method": "GET" }
+    },
+    {
+      "id": "absent-defaults-to-get",
+      "given": { "method": null },
+      "expect": { "allowed": true, "method": "GET" }
+    },
+    { "id": "post-refused", "given": { "method": "POST" }, "expect": { "allowed": false } },
+    { "id": "put-refused", "given": { "method": "PUT" }, "expect": { "allowed": false } },
+    { "id": "patch-refused", "given": { "method": "PATCH" }, "expect": { "allowed": false } },
+    { "id": "delete-refused", "given": { "method": "DELETE" }, "expect": { "allowed": false } },
+    { "id": "options-refused", "given": { "method": "OPTIONS" }, "expect": { "allowed": false } },
+    {
+      "id": "case-variant-post-refused",
+      "description": "Normalisation must not become a bypass.",
+      "given": { "method": "Post" },
+      "expect": { "allowed": false }
+    }
+  ]
+}

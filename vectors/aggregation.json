@@ -1,0 +1,110 @@
+{
+  "rule": "aggregate",
+  "section": "SPEC.md §2.3",
+  "description": "Fold samples into summary counters. not_attempted never enters the denominator, and an empty denominator yields null rather than zero.",
+  "cases": [
+    {
+      "id": "all-successful",
+      "given": {
+        "samples": [
+          { "outcome": "success", "ms": 100 },
+          { "outcome": "success", "ms": 200 }
+        ]
+      },
+      "expect": {
+        "attempted": 2,
+        "success": 2,
+        "failure": 0,
+        "notAttempted": 0,
+        "uptimePct": 100,
+        "avgLatencyMs": 150
+      }
+    },
+    {
+      "id": "rate-limited-samples-leave-the-denominator-alone",
+      "description": "Two successes and two 429s is 100% availability, not 50%. This is the arithmetic of TRUST-METHODOLOGY.md §3.4.",
+      "given": {
+        "samples": [
+          { "outcome": "success", "ms": 100 },
+          { "outcome": "not_attempted", "ms": 5 },
+          { "outcome": "success", "ms": 300 },
+          { "outcome": "not_attempted", "ms": 5 }
+        ]
+      },
+      "expect": {
+        "attempted": 2,
+        "success": 2,
+        "failure": 0,
+        "notAttempted": 2,
+        "uptimePct": 100,
+        "avgLatencyMs": 200
+      }
+    },
+    {
+      "id": "mixed-success-and-failure",
+      "given": {
+        "samples": [
+          { "outcome": "success", "ms": 100 },
+          { "outcome": "failure", "ms": 200 },
+          { "outcome": "failure", "ms": 300 }
+        ]
+      },
+      "expect": {
+        "attempted": 3,
+        "success": 1,
+        "failure": 2,
+        "notAttempted": 0,
+        "uptimePct": 33.33,
+        "avgLatencyMs": 200
+      }
+    },
+    {
+      "id": "nothing-attempted-yields-null-not-zero",
+      "description": "The single most important case. 0% availability is a measurement; no measurement is not.",
+      "given": {
+        "samples": [
+          { "outcome": "not_attempted", "ms": 0 },
+          { "outcome": "not_attempted", "ms": 0 }
+        ]
+      },
+      "expect": {
+        "attempted": 0,
+        "success": 0,
+        "failure": 0,
+        "notAttempted": 2,
+        "uptimePct": null,
+        "avgLatencyMs": null
+      }
+    },
+    {
+      "id": "empty-run-yields-null",
+      "given": { "samples": [] },
+      "expect": {
+        "attempted": 0,
+        "success": 0,
+        "failure": 0,
+        "notAttempted": 0,
+        "uptimePct": null,
+        "avgLatencyMs": null
+      }
+    },
+    {
+      "id": "total-outage-is-zero-not-null",
+      "description": "The mirror of the case above: we did measure, and what we measured was nothing working.",
+      "given": {
+        "samples": [
+          { "outcome": "failure", "ms": 50 },
+          { "outcome": "failure", "ms": 150 }
+        ]
+      },
+      "expect": {
+        "attempted": 2,
+        "success": 0,
+        "failure": 2,
+        "notAttempted": 0,
+        "uptimePct": 0,
+        "avgLatencyMs": 100
+      }
+    }
+  ]
+}

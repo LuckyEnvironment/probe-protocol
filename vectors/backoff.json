@@ -1,0 +1,54 @@
+{
+  "rule": "waitMs",
+  "section": "SPEC.md §4.2, §4.3, §4.5",
+  "description": "How long to wait before the next request to a target. Where a Retry-After and a computed backoff both apply, the longer wins.",
+  "cases": [
+    {
+      "id": "no-rate-limit-holds-the-interval-floor",
+      "given": { "rateLimited": false, "intervalMs": 1000 },
+      "expect": 1000
+    },
+    {
+      "id": "interval-below-the-floor-is-raised",
+      "description": "SPEC.md §4.5. 150ms between requests against someone else's endpoint is not acceptable behaviour.",
+      "given": { "rateLimited": false, "intervalMs": 150 },
+      "expect": 1000
+    },
+    {
+      "id": "first-429-backs-off-one-base",
+      "given": { "rateLimited": true, "consecutiveRateLimits": 0, "retryAfterMs": null },
+      "expect": 1000
+    },
+    {
+      "id": "second-429-doubles",
+      "given": { "rateLimited": true, "consecutiveRateLimits": 1, "retryAfterMs": null },
+      "expect": 2000
+    },
+    {
+      "id": "third-429-doubles-again",
+      "given": { "rateLimited": true, "consecutiveRateLimits": 2, "retryAfterMs": null },
+      "expect": 4000
+    },
+    {
+      "id": "backoff-saturates-at-the-ceiling",
+      "given": { "rateLimited": true, "consecutiveRateLimits": 20, "retryAfterMs": null },
+      "expect": 60000
+    },
+    {
+      "id": "longer-retry-after-wins",
+      "given": { "rateLimited": true, "consecutiveRateLimits": 0, "retryAfterMs": 30000 },
+      "expect": 30000
+    },
+    {
+      "id": "longer-backoff-wins",
+      "given": { "rateLimited": true, "consecutiveRateLimits": 5, "retryAfterMs": 5000 },
+      "expect": 32000
+    },
+    {
+      "id": "retry-after-zero-still-honours-backoff",
+      "description": "An operator answering Retry-After: 0 does not cancel our own courtesy floor.",
+      "given": { "rateLimited": true, "consecutiveRateLimits": 0, "retryAfterMs": 0 },
+      "expect": 1000
+    }
+  ]
+}

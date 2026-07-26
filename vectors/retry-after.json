@@ -1,0 +1,60 @@
+{
+  "rule": "parseRetryAfter",
+  "section": "SPEC.md §4.2",
+  "description": "Resolve either RFC 9110 Retry-After form to milliseconds. `now` is supplied so every case is reproducible.",
+  "cases": [
+    {
+      "id": "delta-seconds",
+      "given": { "header": "120", "now": 1785067200000 },
+      "expect": 120000
+    },
+    {
+      "id": "delta-seconds-zero",
+      "given": { "header": "0", "now": 1785067200000 },
+      "expect": 0
+    },
+    {
+      "id": "delta-seconds-with-surrounding-whitespace",
+      "given": { "header": "  30  ", "now": 1785067200000 },
+      "expect": 30000
+    },
+    {
+      "id": "http-date-in-the-future",
+      "description": "2026-07-26T12:20:00Z is 1200s after the supplied now.",
+      "given": { "header": "Sun, 26 Jul 2026 12:20:00 GMT", "now": 1785067200000 },
+      "expect": 1200000
+    },
+    {
+      "id": "http-date-in-the-past-clamps-to-zero",
+      "given": { "header": "Sun, 26 Jul 2026 11:00:00 GMT", "now": 1785067200000 },
+      "expect": 0
+    },
+    {
+      "id": "absent-header",
+      "given": { "header": null, "now": 1785067200000 },
+      "expect": null
+    },
+    {
+      "id": "empty-header",
+      "given": { "header": "", "now": 1785067200000 },
+      "expect": null
+    },
+    {
+      "id": "malformed-is-absent-not-zero",
+      "description": "Treating garbage as zero delay would turn a malformed header into a licence to hammer the endpoint.",
+      "given": { "header": "soon", "now": 1785067200000 },
+      "expect": null
+    },
+    {
+      "id": "negative-delta-is-malformed",
+      "description": "Not the delta-seconds form; must not be coerced to a negative or zero wait.",
+      "given": { "header": "-5", "now": 1785067200000 },
+      "expect": null
+    },
+    {
+      "id": "fractional-delta-is-malformed",
+      "given": { "header": "1.5", "now": 1785067200000 },
+      "expect": null
+    }
+  ]
+}

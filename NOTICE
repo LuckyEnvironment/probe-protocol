@@ -1,0 +1,16 @@
+BNA
+Copyright 2026 BNA
+
+This product includes software developed by BNA.
+
+This repository is dual-licensed:
+
+  - The schemas, reference vectors, conformance suite and all source code are
+    licensed under the Apache License, Version 2.0. See LICENSE.
+
+  - The prose specification (SPEC.md) is licensed under the Creative Commons
+    Attribution 4.0 International licence. See LICENSE-docs.
+
+The split matches trust-methodology: the specification is a public commitment
+meant to be quoted, translated and reimplemented, while the code that checks
+conformance to it carries a patent grant.

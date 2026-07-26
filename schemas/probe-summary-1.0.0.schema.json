@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bna.dev/schemas/probe-summary/1.0.0.json",
+  "title": "BNA probe summary",
+  "description": "One vantage point's aggregation of probe samples. Specified by SPEC.md v1.0.0.",
+  "type": "object",
+  "required": [
+    "specVersion",
+    "target",
+    "startedAt",
+    "finishedAt",
+    "vantagePoint",
+    "requested",
+    "attempted",
+    "success",
+    "failure",
+    "notAttempted",
+    "uptimePct",
+    "avgLatencyMs",
+    "method",
+    "userAgent",
+    "samples"
+  ],
+  "properties": {
+    "specVersion": {
+      "description": "Version of SPEC.md this summary implements.",
+      "const": "1.0.0"
+    },
+    "target": { "type": "string", "pattern": "^https?://" },
+    "startedAt": { "$ref": "#/$defs/timestamp" },
+    "finishedAt": { "$ref": "#/$defs/timestamp" },
+    "vantagePoint": {
+      "description": "SPEC.md §5.1. A single-origin implementation must never emit bna-multi-region.",
+      "enum": ["single-local", "bna-multi-region"]
+    },
+    "vantagePointNote": {
+      "description": "Plain-language statement that this is not a BNA trust score. Required for single-local.",
+      "type": "string",
+      "minLength": 1
+    },
+    "requested": { "type": "integer", "minimum": 0 },
+    "attempted": {
+      "description": "success + failure. SPEC.md §2.3 — not_attempted samples are excluded.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "success": { "type": "integer", "minimum": 0 },
+    "failure": { "type": "integer", "minimum": 0 },
+    "notAttempted": { "type": "integer", "minimum": 0 },
+    "uptimePct": {
+      "description": "null when attempted is 0. Never 0 as a stand-in for unmeasured.",
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 100
+    },
+    "avgLatencyMs": {
+      "description": "null when attempted is 0.",
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "method": {
+      "description": "SPEC.md §3.1 read-only allowlist.",
+      "enum": ["GET", "HEAD"]
+    },
+    "userAgent": {
+      "description": "SPEC.md §4.1. Must name BNA and link to the methodology.",
+      "type": "string",
+      "pattern": "^BNA [^/]+/[^ ]+ \\(\\+https://bna\\.dev/trust-methodology\\)$"
+    },
+    "observedRegion": {
+      "description": "SPEC.md §5.2. Omit entirely when termination was not observed — never echo the declared value.",
+      "type": "string",
+      "minLength": 1
+    },
+    "tlsVersion": { "type": "string", "minLength": 1 },
+    "cipherSuite": { "type": "string", "minLength": 1 },
+    "deadlineMs": { "type": "integer", "minimum": 0 },
+    "interrupted": { "type": "boolean" },
+    "samples": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sample" }
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "description": "SPEC.md §5.1 — a single-local summary must carry its disclaimer.",
+      "if": { "properties": { "vantagePoint": { "const": "single-local" } }, "required": ["vantagePoint"] },
+      "then": { "required": ["vantagePointNote"] }
+    }
+  ],
+  "$defs": {
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+    },
+    "sample": {
+      "type": "object",
+      "required": ["index", "outcome", "ms", "at"],
+      "properties": {
+        "index": { "type": "integer", "minimum": 1 },
+        "outcome": {
+          "description": "SPEC.md §2.2.",
+          "enum": ["success", "failure", "not_attempted"]
+        },
+        "ms": { "type": "number", "minimum": 0 },
+        "at": { "$ref": "#/$defs/timestamp" },
+        "status": { "type": "integer", "minimum": 100, "maximum": 599 },
+        "reason": {
+          "description": "Required for every non-success outcome. http_<status> covers §2.2 row 6.",
+          "type": "string",
+          "pattern": "^(interrupted|deadline_exceeded|rate_limited|excluded|network_error|http_[1-5][0-9]{2})$"
+        },
+        "retryAfterMs": {
+          "description": "SPEC.md §4.2, resolved to milliseconds from either RFC 9110 form.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "description": "SPEC.md §2.2 — a non-success sample must say why.",
+          "if": {
+            "properties": { "outcome": { "enum": ["failure", "not_attempted"] } },
+            "required": ["outcome"]
+          },
+          "then": { "required": ["reason"] }
+        }
+      ]
+    }
+  }
+}
