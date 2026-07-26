@@ -73,8 +73,7 @@ test("an implementation in another process can be driven through the contract", 
 
 test("the report is plain text with no colour or box drawing", async () => {
   const report = formatReport(await runConformance());
-  // eslint-disable-next-line no-control-regex
-  assert.doesNotMatch(report, /\[/, "report contains ANSI escapes");
+  assert.doesNotMatch(report, /\x1b\[/, "report contains ANSI escapes");
   assert.doesNotMatch(report, /[─│┌┐└┘├┤┬┴┼]/, "report depends on box drawing");
   assert.match(report, /passed, 0 failed/);
 });
