@@ -22,6 +22,15 @@ export {
 } from "./rules.js";
 
 export { validate } from "./validate.js";
-export { applyReference, formatReport, loadVectors, matches, runConformance } from "./conformance.js";
+export {
+  VECTOR_MANIFEST,
+  applyReference,
+  formatReport,
+  loadVectors,
+  matches,
+  runConformance,
+  runVectors,
+  vectorFileNames
+} from "./conformance.js";
 export { subprocessImplementation } from "./subprocess.js";
 export { summarySchema, validateSummary } from "./summary.js";

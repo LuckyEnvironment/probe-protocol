@@ -1,0 +1,12 @@
+{
+  "description": "Vector manifest. SPEC.md §7.1 promises a sceptic can run the suite anywhere; a client without a directory listing — a browser, a fetch over HTTP — enumerates the vectors from here. test/conformance.test.js fails if this drifts from the directory.",
+  "specVersion": "1.0.0",
+  "files": [
+    "aggregation.json",
+    "backoff.json",
+    "outcome-classification.json",
+    "read-only.json",
+    "retry-after.json",
+    "user-agent.json"
+  ]
+}

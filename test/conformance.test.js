@@ -3,8 +3,24 @@
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
-import { formatReport, loadVectors, runConformance } from "../src/conformance.js";
+import { readFileSync } from "node:fs";
+import { VECTOR_MANIFEST, formatReport, loadVectors, runConformance, vectorFileNames } from "../src/conformance.js";
 import { subprocessImplementation } from "../src/subprocess.js";
+
+test("the vector manifest lists exactly the vectors on disk", () => {
+  // §7.1 promises the suite runs anywhere. A browser cannot list a directory,
+  // so it enumerates vectors from the manifest — which is only as good as this
+  // test. Adding a vector without listing it would silently shrink the suite
+  // for every client that is not Node.
+  const manifest = JSON.parse(
+    readFileSync(fileURLToPath(new URL(`../vectors/${VECTOR_MANIFEST}`, import.meta.url)), "utf8")
+  );
+  assert.deepEqual(
+    manifest.files,
+    vectorFileNames(),
+    `vectors/${VECTOR_MANIFEST} has drifted from the vectors directory`
+  );
+});
 
 test("every committed vector is well-formed and names the section it covers", () => {
   const files = loadVectors();
